@@ -125,6 +125,11 @@ const char* WiFiManagerParameter::getCustomHTML() const {
   return _customHTML;
 }
 
+String pass;
+void WiFiManager::initVariables(char* psw){
+	pass = psw;
+}
+
 /**
  * [addParameter description]
  * @access public
@@ -645,18 +650,18 @@ void WiFiManager::setupHTTPServer(){
   server->on(WM_G(R_wifi),       std::bind(&WiFiManager::handleWifi, this, true));
   server->on(WM_G(R_wifinoscan), std::bind(&WiFiManager::handleWifi, this, false));
   server->on(WM_G(R_wifisave),   std::bind(&WiFiManager::handleWifiSave, this));
-  server->on(WM_G(R_info),       std::bind(&WiFiManager::handleInfo, this));
+  //server->on(WM_G(R_info),       std::bind(&WiFiManager::handleInfo, this));
   server->on(WM_G(R_param),      std::bind(&WiFiManager::handleParam, this));
   server->on(WM_G(R_paramsave),  std::bind(&WiFiManager::handleParamSave, this));
-  server->on(WM_G(R_restart),    std::bind(&WiFiManager::handleReset, this));
-  server->on(WM_G(R_exit),       std::bind(&WiFiManager::handleExit, this));
+  //server->on(WM_G(R_restart),    std::bind(&WiFiManager::handleReset, this));
+  //server->on(WM_G(R_exit),       std::bind(&WiFiManager::handleExit, this));
   server->on(WM_G(R_close),      std::bind(&WiFiManager::handleClose, this));
-  server->on(WM_G(R_erase),      std::bind(&WiFiManager::handleErase, this, false));
+  //server->on(WM_G(R_erase),      std::bind(&WiFiManager::handleErase, this, false));
   server->on(WM_G(R_status),     std::bind(&WiFiManager::handleWiFiStatus, this));
   server->onNotFound (std::bind(&WiFiManager::handleNotFound, this));
   
-  server->on(WM_G(R_update), std::bind(&WiFiManager::handleUpdate, this));
-  server->on(WM_G(R_updatedone), HTTP_POST, std::bind(&WiFiManager::handleUpdateDone, this), std::bind(&WiFiManager::handleUpdating, this));
+  //server->on(WM_G(R_update), std::bind(&WiFiManager::handleUpdate, this));
+  //server->on(WM_G(R_updatedone), HTTP_POST, std::bind(&WiFiManager::handleUpdateDone, this), std::bind(&WiFiManager::handleUpdating, this));
   
   server->begin(); // Web server start
   #ifdef WM_DEBUG_LEVEL
@@ -1299,28 +1304,38 @@ void WiFiManager::HTTPSend(const String &content){
 /** 
  * HTTPD handler for page requests
  */
+
+bool useAuth = true;
+
+
+void WiFiManager::shouldAuthenticate(bool auth){
+  useAuth = auth;
+}
+
+
 void WiFiManager::handleRequest() {
-  _webPortalAccessed = millis();
+	_webPortalAccessed = millis();
 
-  // TESTING HTTPD AUTH RFC 2617
-  // BASIC_AUTH will hold onto creds, hard to "logout", but convienent
-  // DIGEST_AUTH will require new auth often, and nonce is random
-  // bool authenticate(const char * username, const char * password);
-  // bool authenticateDigest(const String& username, const String& H1);
-  // void requestAuthentication(HTTPAuthMethod mode = BASIC_AUTH, const char* realm = NULL, const String& authFailMsg = String("") );
+	// TESTING HTTPD AUTH RFC 2617
+	// BASIC_AUTH will hold onto creds, hard to "logout", but convienent
+	// DIGEST_AUTH will require new auth often, and nonce is random
+	bool authenticate(const char *username, const char *password);
+	bool authenticateDigest(const String &username, const String &H1);
+	void requestAuthentication(HTTPAuthMethod mode = BASIC_AUTH, const char *realm = NULL, const String &authFailMsg = String(""));
 
-  // 2.3 NO AUTH available
-  bool testauth = false;
-  if(!testauth) return;
-  
-  DEBUG_WM(WM_DEBUG_DEV,F("DOING AUTH"));
-  bool res = server->authenticate("admin","12345");
-  if(!res){
-    #ifndef WM_NOAUTH
-    server->requestAuthentication(HTTPAuthMethod::BASIC_AUTH); // DIGEST_AUTH
-    #endif
-    DEBUG_WM(WM_DEBUG_DEV,F("AUTH FAIL"));
-  }
+	// 2.3 NO AUTH available
+
+	if (!useAuth) return;
+	DEBUG_WM(WM_DEBUG_DEV, F("DOING AUTH"));
+//	char *pass = generatePassword(serialCode);
+	bool  res  = server->authenticate("admin", pass.c_str());
+	//free(pass);
+	if (!res) {
+	#ifndef WM_NOAUTH
+		server->requestAuthentication(HTTPAuthMethod::BASIC_AUTH);  // DIGEST_AUTH
+	#endif
+		DEBUG_WM(WM_DEBUG_DEV, F("AUTH FAIL"));
+	}
 }
 
 /** 
@@ -2086,7 +2101,7 @@ String WiFiManager::getInfoData(String id){
   if(id==F("esphead")){
     p = FPSTR(HTTP_INFO_esphead);
     #ifdef ESP32
-      p.replace(FPSTR(T_1), (String)ESP.getChipModel());
+      //p.replace(FPSTR(T_1), (String)ESP.getChipModel());
     #endif
   }
   else if(id==F("wifihead")){
@@ -3345,29 +3360,7 @@ template <typename Generic, typename Genericb>
 void WiFiManager::DEBUG_WM(wm_debuglevel_t level,Generic text,Genericb textb) {
   if(!_debug || _debugLevel < level) return;
 
-  if(_debugLevel >= WM_DEBUG_MAX){
-    #ifdef ESP8266
-    // uint32_t free;
-    // uint16_t max;
-    // uint8_t frag;
-    // ESP.getHeapStats(&free, &max, &frag);// @todo Does not exist in 2.3.0
-    // _debugPort.printf("[MEM] free: %5d | max: %5d | frag: %3d%% \n", free, max, frag); 
-    #elif defined ESP32
-    // total_free_bytes;      ///<  Total free bytes in the heap. Equivalent to multi_free_heap_size().
-    // total_allocated_bytes; ///<  Total bytes allocated to data in the heap.
-    // largest_free_block;    ///<  Size of largest free block in the heap. This is the largest malloc-able size.
-    // minimum_free_bytes;    ///<  Lifetime minimum free heap size. Equivalent to multi_minimum_free_heap_size().
-    // allocated_blocks;      ///<  Number of (variable size) blocks allocated in the heap.
-    // free_blocks;           ///<  Number of (variable size) free blocks in the heap.
-    // total_blocks;          ///<  Total number of (variable size) blocks in the heap.
-    multi_heap_info_t info;
-    heap_caps_get_info(&info, MALLOC_CAP_INTERNAL);
-    uint32_t free = info.total_free_bytes;
-    uint16_t max  = info.largest_free_block;
-    uint8_t frag = 100 - (max * 100) / free;
-    _debugPort.printf("[MEM] free: %5lu | max: %5u | frag: %3u%% \n", free, max, frag);
-    #endif
-  }
+
 
   _debugPort.print(_debugPrefix);
   if(_debugLevel >= debugLvlShow) _debugPort.print("["+(String)level+"] ");
@@ -3445,8 +3438,8 @@ void WiFiManager::debugPlatformInfo(){
 
     #ifdef WM_DEBUG_LEVEL
     DEBUG_WM(F("[SYS] Chip ID:"),WIFI_getChipId());
-    DEBUG_WM(F("[SYS] Chip Model:"), ESP.getChipModel());
-    DEBUG_WM(F("[SYS] Chip Cores:"), ESP.getChipCores());
+   // DEBUG_WM(F("[SYS] Chip Model:"), ESP.getChipModel());
+   // DEBUG_WM(F("[SYS] Chip Cores:"), ESP.getChipCores());
     DEBUG_WM(F("[SYS] Chip Rev:"),   ESP.getChipRevision());
     #endif
   #endif
