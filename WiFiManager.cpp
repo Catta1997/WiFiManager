@@ -624,6 +624,18 @@ void WiFiManager::setupHTTPServer(){
 
   #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(F("Starting Web Portal"));
+  Serial.println("");
+	Serial.println("");
+	Serial.println("Credenziali WebServer: ");
+	Serial.println("--------------------------------");
+	Serial.println("|                              |");
+	Serial.println("|  Username: admin             |");
+	Serial.println("|  Password: " + String(pass) + "      |");
+	Serial.println("|                              |");
+	Serial.println("--------------------------------");
+	Serial.println("");
+	Serial.println("");
+	Serial.println("");
   #endif
 
   if(_httpPort != 80) {
@@ -715,6 +727,17 @@ boolean  WiFiManager::startConfigPortal(char const *apName, char const *apPasswo
   
   #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(WM_DEBUG_VERBOSE,F("Starting Config Portal"));
+  Serial.println("");
+	Serial.println("");
+	Serial.println("Credenziali AP: ");
+	Serial.println("--------------------------------");
+	Serial.println("|                              |");
+	Serial.println("|  Password: " + String(pass) + "      |");
+	Serial.println("|                              |");
+	Serial.println("--------------------------------");
+	Serial.println("");
+	Serial.println("");
+	Serial.println("");
   #endif
 
   if(_apName == "") _apName = getDefaultAPName();
