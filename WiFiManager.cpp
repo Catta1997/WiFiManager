@@ -1337,28 +1337,28 @@ void WiFiManager::shouldAuthenticate(bool auth){
 
 
 void WiFiManager::handleRequest() {
-	_webPortalAccessed = millis();
+  _webPortalAccessed = millis();
 
-	// TESTING HTTPD AUTH RFC 2617
-	// BASIC_AUTH will hold onto creds, hard to "logout", but convienent
-	// DIGEST_AUTH will require new auth often, and nonce is random
-	bool authenticate(const char *username, const char *password);
-	bool authenticateDigest(const String &username, const String &H1);
-	void requestAuthentication(HTTPAuthMethod mode = BASIC_AUTH, const char *realm = NULL, const String &authFailMsg = String(""));
+  // TESTING HTTPD AUTH RFC 2617
+  // BASIC_AUTH will hold onto creds, hard to "logout", but convienent
+  // DIGEST_AUTH will require new auth often, and nonce is random
+  bool authenticate(const char * username, const char * password);
+  bool authenticateDigest(const String& username, const String& H1);
+  void requestAuthentication(HTTPAuthMethod mode = BASIC_AUTH, const char* realm = NULL, const String& authFailMsg = String("") );
 
-	// 2.3 NO AUTH available
+  // 2.3 NO AUTH available
 
-	if (!useAuth) return;
-	DEBUG_WM(WM_DEBUG_DEV, F("DOING AUTH"));
+  if (!useAuth) return;
+  DEBUG_WM(WM_DEBUG_DEV, F("DOING AUTH"));
 //	char *pass = generatePassword(serialCode);
-	bool  res  = server->authenticate("admin", pass.c_str());
-	//free(pass);
-	if (!res) {
-	#ifndef WM_NOAUTH
-		server->requestAuthentication(HTTPAuthMethod::BASIC_AUTH);  // DIGEST_AUTH
-	#endif
-		DEBUG_WM(WM_DEBUG_DEV, F("AUTH FAIL"));
-	}
+  bool  res  = server->authenticate("admin", pass.c_str());
+  //free(pass);
+  if (!res) {
+  #ifndef WM_NOAUTH
+    server->requestAuthentication(HTTPAuthMethod::BASIC_AUTH);  // DIGEST_AUTH
+  #endif
+    DEBUG_WM(WM_DEBUG_DEV, F("AUTH FAIL"));
+  }
 }
 
 /** 
