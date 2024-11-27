@@ -1357,6 +1357,7 @@ void WiFiManager::handleRequest() {
     server->requestAuthentication(HTTPAuthMethod::BASIC_AUTH); // DIGEST_AUTH
     #endif
     DEBUG_WM(WM_DEBUG_DEV,F("AUTH FAIL"));
+  }
 }
 
 /** 
