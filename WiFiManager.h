@@ -251,9 +251,9 @@ class WiFiManager
     WiFiManager();
     ~WiFiManager();
     void WiFiManagerInit();
-	void initVariables(char *psw);
+    void initVariables(char *psw);
     bool useAuth;
-	void shouldAuthenticate(bool auth);
+    void shouldAuthenticate(bool auth);
     // auto connect to saved wifi, or custom, and start config portal on failures
     boolean       autoConnect();
     boolean       autoConnect(char const *apName, char const *apPassword = NULL);
