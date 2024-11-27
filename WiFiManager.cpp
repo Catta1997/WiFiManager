@@ -1348,17 +1348,15 @@ void WiFiManager::handleRequest() {
 
   // 2.3 NO AUTH available
 
-  if (!useAuth) return;
-  DEBUG_WM(WM_DEBUG_DEV, F("DOING AUTH"));
-//	char *pass = generatePassword(serialCode);
-  bool  res  = server->authenticate("admin", pass.c_str());
-  //free(pass);
-  if (!res) {
-  #ifndef WM_NOAUTH
-    server->requestAuthentication(HTTPAuthMethod::BASIC_AUTH);  // DIGEST_AUTH
-  #endif
-    DEBUG_WM(WM_DEBUG_DEV, F("AUTH FAIL"));
-  }
+  if(!useAuth) return;
+
+  DEBUG_WM(WM_DEBUG_DEV,F("DOING AUTH"));
+  bool res = server->authenticate("admin",pass.c_str());
+  if(!res){
+    #ifndef WM_NOAUTH
+    server->requestAuthentication(HTTPAuthMethod::BASIC_AUTH); // DIGEST_AUTH
+    #endif
+    DEBUG_WM(WM_DEBUG_DEV,F("AUTH FAIL"));
 }
 
 /** 
