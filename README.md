@@ -1,6 +1,16 @@
 
 # WiFiManager
 
+
+
+
+# THIS IS AN EDITED VERSION FOR PERSONAL USE
+
+
+
+
+
+
 Espressif ESPx WiFi Connection manager with fallback web configuration portal
 
 :warning: This Documentation is out of date, see notes below
