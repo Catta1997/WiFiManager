@@ -751,7 +751,7 @@ boolean  WiFiManager::startConfigPortal(char const *apName, char const *apPasswo
   
   #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(WM_DEBUG_VERBOSE,F("Starting Config Portal"));
-  printBox(" ", pass," ");
+  printBox("", pass,"");
   #endif
 
   if(_apName == "") _apName = getDefaultAPName();
